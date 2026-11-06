@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' file:; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Vérification locale Kalimdor — WoWCarto 1.20</title>
+<style>
+body { font: 16px system-ui, sans-serif; margin: 1.5rem; max-width: 110rem; color: #181818; background: #fff; }
+label { display: block; margin: .7rem 0; } button, select, input, textarea { font: inherit; }
+textarea { display: block; width: min(95%, 55rem); min-height: 4rem; }
+button { padding: .4rem .7rem; margin: .2rem; } input[type=number] { width: 5rem; }
+section { border-top: 1px solid #888; margin-top: 1.5rem; padding-top: .5rem; }
+.notice { border: 2px solid #9b5900; padding: .8rem; } #message { white-space: pre-wrap; }
+#viewport { max-height: 65vh; overflow: auto; border: 1px solid #555; }
+#grid { display: grid; gap: 0; width: max-content; background: magenta; }
+#grid button { position: relative; border: 0; padding: 0; margin: 0; line-height: 0; cursor: crosshair; }
+#grid img { width: 100%; height: 100%; display: block; } #grid span { position: absolute; top: 0; left: 0; color: white; background: black; font-size: 12px; line-height: 1.3; }
+#grid button[aria-pressed=true] { outline: 3px solid #00ff00; outline-offset: -3px; }
+#seam-images { display: flex; width: max-content; max-width: 100%; overflow: auto; }
+#seam-images img { display: block; max-width: none; border: 1px solid #555; }
+#seam-images figure { margin: 0; } pre { white-space: pre-wrap; } #saved { max-height: 15rem; overflow: auto; }
+</style>
+<h1>Vérification locale Kalimdor</h1>
+<p class="notice"><strong>Disposition candidate, non validée.</strong> Comparer les raccords et repères dans le véritable WoWCartographe 1.20. Aucune annotation de carte n'est présumée correcte. Cette page ne modifie aucun fichier du jeu et n'envoie rien sur Internet.</p>
+<p id="build"></p>
+<p>1. Choisir une composante et cliquer une tuile. 2. Décrire les preuves de sa position dans WoWCarto, corriger x/y si nécessaire, puis enregistrer. 3. Relever la Croisée, la Grande fracture et un troisième repère. 4. Télécharger les observations avant de fermer cette page. Les saisies restent en mémoire jusqu'au téléchargement.</p>
+<label>Composante candidate <select id="component"></select></label>
+<label>Échelle d'affichage <input id="scale" type="range" min="25" max="200" value="100" step="25"> <output id="scale-value">100 %</output></label>
+<p>Origine de grille relative ; x vers la droite, y vers le bas. Le magenta indique une case non couverte. Aucun pixel source n'est retouché.</p>
+<div id="viewport"><div id="grid" aria-label="Tuiles candidates"></div></div>
+<section>
+<h2>Position observée</h2>
+<p id="selection">Cliquer une tuile, ou y accéder au clavier puis appuyer sur Entrée.</p>
+<label>x <input id="tile-x" type="number" min="-100" max="100" step="1"> y <input id="tile-y" type="number" min="-100" max="100" step="1"></label>
+<label>Preuve de position et de raccord (référence de capture locale, voisinages contrôlés, observations)<textarea id="tile-evidence"></textarea></label>
+<label><input id="original-confirmed" type="checkbox"> Position contrôlée dans le véritable WoWCartographe 1.20</label>
+<button id="save-tile" type="button">Enregistrer cette position</button>
+<button id="remove-tile" type="button">Retirer cette position et ses repères</button>
+</section>
+<section>
+<h2>Repère géographique</h2>
+<p>Cliquer précisément dans la tuile avant d'enregistrer : la position est mesurée en pixels de l'image standard, pas en coordonnées WoW. Au clavier, renseigner les pixels manuellement.</p>
+<label>Repère <select id="landmark"><option value="crossroads">La Croisée</option><option value="great-fissure">Grande fracture (référence Cataclysm)</option><option value="third">Troisième repère commun</option></select></label>
+<label>Nom <input id="landmark-name" value="La Croisée"></label>
+<label>Pixel x <input id="pixel-x" type="number" min="0" step="1"> y <input id="pixel-y" type="number" min="0" step="1"></label>
+<label>Preuve de localisation dans l'application originale<textarea id="landmark-evidence"></textarea></label>
+<button id="save-landmark" type="button">Enregistrer ce repère sur la tuile sélectionnée</button>
+</section>
+<section>
+<h2>Contrôle des raccords</h2>
+<p>Les raccords écartés par l'algorithme restent proposés à l'examen ; ils ne sont pas déclarés faux. Enregistrer d'abord les positions des deux tuiles.</p>
+<label>Raccord <select id="seam"></select></label>
+<div id="seam-images"></div>
+<label>Résultat observé <select id="seam-result"><option value="uncertain">Incertain</option><option value="matches">Concordant</option><option value="contradicts">Contradictoire</option></select></label>
+<label>Preuve ou anomalie observée<textarea id="seam-evidence"></textarea></label>
+<button id="save-seam" type="button">Enregistrer ce contrôle</button>
+</section>
+<section>
+<h2>Conserver et transmettre les résultats</h2>
+<p>Le JSON téléchargé contient les noms, dimensions, empreintes et observations, sans pixels ni chemins d'installation. Vérifier les textes saisis avant de le transmettre. Garder les captures et cartes sur le PC. Une déclaration n'authentifie pas sa preuve.</p>
+<p id="count"></p><pre id="saved"></pre>
+<button id="download" type="button">Télécharger layout-observed.json</button>
+<label>Reprendre des observations précédemment téléchargées <input id="resume" type="file" accept=".json,application/json"></label>
+<p id="message" role="status" aria-live="polite"></p>
+</section>
+<script id="review-data" type="application/json">/*__REVIEW_DATA__*/</script>
+<script>/*__REVIEW_SCRIPT__*/</script>
+</html>

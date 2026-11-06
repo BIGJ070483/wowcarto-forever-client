@@ -1,0 +1,28 @@
+name: Signaler un bug
+description: Un problème reproductible dans le client ou la synchronisation
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version ou commit, version de Windows
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Mode concerné
+      options: [Référence 1.20, Modern, Legacy candidat, Service communautaire]
+  - type: textarea
+    id: steps
+    attributes:
+      label: Étapes pour reproduire
+      description: Préciser la base, la zone, le zoom et le résultat attendu.
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Résultat observé
+      description: Retirer les données personnelles et les identifiants des journaux.
+    validations:
+      required: true

@@ -1,0 +1,14 @@
+name: Proposition ou traduction
+description: Amélioration, contenu communautaire ou traduction
+body:
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposition et besoin utilisateur
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sources, langue ou exemples
+      description: Ne pas joindre de fichiers propriétaires ou d'informations personnelles.

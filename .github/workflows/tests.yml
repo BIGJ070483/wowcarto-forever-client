@@ -1,0 +1,45 @@
+name: Client and community tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  client:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install -r requirements.txt
+      - name: Client and unit tests (optional dependencies may be skipped)
+        run: python -m unittest discover -s tests -v
+  community:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          extensions: pdo_sqlite, pdo_mysql
+          coverage: none
+      - run: python -m pip install -r requirements.txt
+      - name: PHP syntax
+        run: find hosting/web -name '*.php' -print0 | xargs -0 -n1 php -l
+      - name: HTTP, HTTPS, revisions and paginated snapshots
+        env:
+          WCF_REQUIRE_PHP_TESTS: '1'
+        run: >-
+          python -m unittest tests.test_hosting_http tests.test_community_http
+          tests.test_clone_contributions tests.test_reference_community_http
+          tests.test_community_transport tests.test_clone_community -v

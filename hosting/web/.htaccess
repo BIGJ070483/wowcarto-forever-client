@@ -1,0 +1,8 @@
+<IfDefine Free>
+php85 1
+</IfDefine>
+Options -Indexes
+<FilesMatch "^\.">
+Order Allow,Deny
+Deny from all
+</FilesMatch>
